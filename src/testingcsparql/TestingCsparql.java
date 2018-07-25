@@ -5,7 +5,7 @@
  */
 package testingcsparql;
 
-import com.sun.xml.internal.ws.api.pipe.Engine;
+
 import eu.larkc.csparql.cep.api.RdfStream;
 import eu.larkc.csparql.common.RDFTable;
 import eu.larkc.csparql.core.engine.ConsoleFormatter;
@@ -49,12 +49,12 @@ public class TestingCsparql {
         //logger.debug("WHO_LIKES_WHAT example");
         
         query = "REGISTER QUERY sensorValueOf AS "
-        + "PREFIX :<http://www.semanticweb.org/40011133/ontologies/2017/10/untitled-ontology-21#> "
-	+ "SELECT ?temperatureSensor ?temperatureValue "
-	+ "FROM STREAM <http://www.semanticweb.org/40011133/ontologies/2017/10/untitled-ontology-21/stream> [RANGE 10s STEP 1s] "
-	+ "WHERE { ?temperatureSensor :isValueOf ?temperatureValue}";
+        + "PREFIX smartSpace:<http://localhost:8080/smartSpace#> "
+	+ "SELECT ?tempReadings ?value "
+	+ "FROM STREAM <http://localhost:8080/smartSpace/stream> [RANGE 10s STEP 1s] "
+	+ "WHERE { ?tempReadings smartSpace:hasValue ?value}";
 
-	tg = new LBSMARDFStreamTestGenerator("http://www.semanticweb.org/40011133/ontologies/2017/10/untitled-ontology-21/stream");
+	tg = new LBSMARDFStreamTestGenerator("http://localhost:8080/smartSpace/stream");
 			//			tg = new BasicIntegerRDFStreamTestGenerator("http://myexample.org/stream");
                         
         // Register an RDF Stream
@@ -84,7 +84,7 @@ public class TestingCsparql {
                      String dateString = new SimpleDateFormat("dd MMM yyyy hh:mm:ss a").format(date);
                      System.out.println("----"+rdfTable.size()+" result at SystemTime=["+dateString+"]-----");
                      rdfTable.stream().forEach((t) -> {
-                         System.out.println(t.toString());
+                        // System.out.println(t.toString());
             });
                      System.out.println("");
                      

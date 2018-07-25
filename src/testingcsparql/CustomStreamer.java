@@ -15,6 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 
+
 public class CustomStreamer implements Runnable {
     
     private RSP_services_csparql_API csparqlAPI;
