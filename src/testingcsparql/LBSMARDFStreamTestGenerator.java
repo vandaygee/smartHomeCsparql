@@ -67,11 +67,8 @@ public class LBSMARDFStreamTestGenerator extends RdfStream implements Runnable {
         
     @Override
     public void run() {
-
 	keepRunning = true;
-                
         Random rnd = new Random();
-                
         OntModel model=ModelFactory.createOntologyModel(OntModelSpec.RDFS_MEM);
         OntClass tempValue=model.createClass(BASE+"tempValue");
         Individual tempReadings;
@@ -182,16 +179,16 @@ public class LBSMARDFStreamTestGenerator extends RdfStream implements Runnable {
         Reasoner reasoner=new GenericRuleReasoner(rules);
         //reasoner=reasoner.bindSchema(model);
         InfModel infmodel=ModelFactory.createInfModel(reasoner, model);
-//        Resource children = infmodel.getResource("http://localhost:8080/smartSpace#hasValue");
-//        infmodel.write(System.out, "RDF/XML-ABBREV");
-        StmtIterator it=infmodel.listStatements();
-        while(it.hasNext()){
-            Statement stmt=it.nextStatement();
-            Resource subject = stmt.getSubject();
-            Property predicate = stmt.getPredicate();
-            RDFNode object = stmt.getObject(); 
-            System.out.println( subject.toString() + " " + predicate.toString() + " " + object.toString() );
-        }
+        Resource children = infmodel.getResource("http://localhost:8080/smartSpace#hasValue");
+        infmodel.write(System.out, "RDF/XML-ABBREV");
+//        StmtIterator it=infmodel.listStatements();
+//        while(it.hasNext()){
+//            Statement stmt=it.nextStatement();
+//            Resource subject = stmt.getSubject();
+//            Property predicate = stmt.getPredicate();
+//            RDFNode object = stmt.getObject(); 
+//            System.out.println( subject.toString() + " " + predicate.toString() + " " + object.toString() );
+        //}
     }
 
 
