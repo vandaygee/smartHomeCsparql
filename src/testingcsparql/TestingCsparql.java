@@ -6,6 +6,7 @@
 package testingcsparql;
 
 
+import com.hp.hpl.jena.rdf.model.InfModel;
 import eu.larkc.csparql.cep.api.RdfStream;
 import eu.larkc.csparql.common.RDFTable;
 import eu.larkc.csparql.core.engine.ConsoleFormatter;
@@ -27,6 +28,8 @@ import org.slf4j.LoggerFactory;
 public class TestingCsparql {
 
     private static Logger logger = LoggerFactory.getLogger(TestingCsparql.class);
+    
+    public static InfModel infModel;
     
     public static void main(String[] args) {
         // TODO code application logic here
@@ -84,9 +87,11 @@ public class TestingCsparql {
                      String dateString = new SimpleDateFormat("dd MMM yyyy hh:mm:ss a").format(date);
                      System.out.println("----"+rdfTable.size()+" result at SystemTime=["+dateString+"]-----");
                      rdfTable.stream().forEach((t) -> {
-                        // System.out.println(t.toString());
+                     System.out.println(t.toString());
             });
                      System.out.println("");
+                     System.out.println("\nInferencing...");
+                     //displayInferencing(getInfModel());
                      
                     //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
                 }
@@ -120,5 +125,16 @@ public class TestingCsparql {
             logger.error(e.getMessage(), e);
         }
     }
- 
+    
+    public static void SetInfModel(InfModel infmodel){
+        infModel=infmodel;
+    }
+    
+    public static InfModel getInfModel(){
+        return infModel;
+    }
+    
+     public static void displayInferencing(InfModel infmodel){
+         infmodel.write(System.out, "RDF/XML-ABBREV");
+     }
 }

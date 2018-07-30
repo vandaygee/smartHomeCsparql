@@ -52,8 +52,12 @@ public class LBSMARDFStreamTestGenerator extends RdfStream implements Runnable {
     private RdfQuadruple q=null;
        
     float generatedSensorValue =0.0F;
+    long generatedTime=0L;
+    float generatedPressure=0.0F;
+    int generatedHumidity= 0;
         
         //Model m = ModelFactory.createDefaultModel();
+    OntModel accumulatedModel=ModelFactory.createOntologyModel(OntModelSpec.RDFS_MEM);
         
     private static final String BASE="http://localhost:8080/smartSpace#";
         
@@ -69,12 +73,45 @@ public class LBSMARDFStreamTestGenerator extends RdfStream implements Runnable {
     public void run() {
 	keepRunning = true;
         Random rnd = new Random();
-        OntModel model=ModelFactory.createOntologyModel(OntModelSpec.RDFS_MEM);
-        OntClass tempValue=model.createClass(BASE+"tempValue");
+        OntClass tempValue=accumulatedModel.createClass(BASE+"tempValue");
+        OntClass humidityValue=accumulatedModel.createClass(BASE+"humidityValue");
+        OntClass pressureValue=accumulatedModel.createClass(BASE+"pressureValue");
+        
         Individual tempReadings;
+        Individual humidityReadings;
+        Individual pressureReading;
+        
         while (keepRunning) {
-            //Instant instant = Instant.ofEpochMilli ( millisecondsSinceEpoch );
+            OntModel streamingModel=ModelFactory.createOntologyModel(OntModelSpec.RDFS_MEM);
+            
+            OntClass streamingtempValue=streamingModel.createClass(BASE+"tempValue");
+            OntClass streaminghumidityValue=streamingModel.createClass(BASE+"humidityValue");
+            OntClass streamingpressureValue=streamingModel.createClass(BASE+"pressureValue");
+            
+            Individual streamingtempReadings;
+            Individual streaminghumidityReadings;
+            Individual streamingpressureReading;
+            
             Instant instant=Instant.now();
+            generatedTime=System.currentTimeMillis();
+            generatedPressure=750.0F + new Random().nextFloat()* (762.0F - 750.0F);
+            generatedHumidity= 30 + (int)(Math.random()*(60-30)+1);
+                 
+            pressureReading=pressureValue.createIndividual(BASE+"pressureReading"+this.c);
+            pressureReading.addProperty(p("hasPressureReading"),l1(roundOffTo2DecPlaces(generatedPressure),XSDDatatype.XSDfloat));
+            pressureReading.addProperty(p("hasTimestamp"),l1(String.valueOf(instant),XSDDatatype.XSDdateTime));
+            
+            humidityReadings=humidityValue.createIndividual(BASE+"humidityReading"+this.c);
+            humidityReadings.addProperty(p("hasHumidityReading"),l1(String.valueOf(generatedHumidity),XSDDatatype.XSDinteger));
+            humidityReadings.addProperty(p("hasTimestamp"),l1(String.valueOf(instant),XSDDatatype.XSDdateTime));
+            
+            streamingpressureReading=pressureValue.createIndividual(BASE+"pressureReading"+this.c);
+            streamingpressureReading.addProperty(p("hasPressureReading"),l1(roundOffTo2DecPlaces(generatedPressure),XSDDatatype.XSDfloat));
+            streamingpressureReading.addProperty(p("hasTimestamp"),l1(String.valueOf(instant),XSDDatatype.XSDdateTime));
+            
+            humidityReadings=humidityValue.createIndividual(BASE+"humidityReading"+this.c);
+            humidityReadings.addProperty(p("hasHumidityReading"),l1(String.valueOf(generatedHumidity),XSDDatatype.XSDinteger));
+            humidityReadings.addProperty(p("hasTimestamp"),l1(String.valueOf(instant),XSDDatatype.XSDdateTime));
 
             if(System.currentTimeMillis()%3==0){
                 generatedSensorValue= 0.0F + new Random().nextFloat() * (22.0F - 0.0F);
@@ -83,12 +120,16 @@ public class LBSMARDFStreamTestGenerator extends RdfStream implements Runnable {
 			"http://localhost:8080/smartSpace#hasValue", 
                         //"http://www.semanticweb.org/40011133/ontologies/2017/10/untitled-ontology-21#temperatureValue" + this.c,
                         String.format("%.2f", generatedSensorValue) ,
-                        System.currentTimeMillis());
+                        generatedTime);
                 this.put(q);
                        
                 tempReadings=tempValue.createIndividual(BASE+"tempReadings"+this.c);
                 tempReadings.addProperty(p("hasValue"),l1(roundOffTo2DecPlaces(generatedSensorValue),XSDDatatype.XSDfloat));
                 tempReadings.addProperty(p("hasTimestamp"),l1(String.valueOf(instant),XSDDatatype.XSDdateTime));
+                
+                streamingtempReadings=tempValue.createIndividual(BASE+"tempReadings"+this.c);
+                streamingtempReadings.addProperty(p("hasValue"),l1(roundOffTo2DecPlaces(generatedSensorValue),XSDDatatype.XSDfloat));
+                streamingtempReadings.addProperty(p("hasTimestamp"),l1(String.valueOf(instant),XSDDatatype.XSDdateTime));
             }else if(System.currentTimeMillis()%5==0){
                 generatedSensorValue= 23.0F + new Random().nextFloat() * (28.0F - 23.0F);
                 q = new RdfQuadruple("http://localhost:8080/smartSpace#tempReadings" + this.c,
@@ -100,6 +141,10 @@ public class LBSMARDFStreamTestGenerator extends RdfStream implements Runnable {
                 tempReadings=tempValue.createIndividual(BASE+"tempReadings"+this.c);
                 tempReadings.addProperty(p("hasValue"),l1(roundOffTo2DecPlaces(generatedSensorValue),XSDDatatype.XSDfloat));
                 tempReadings.addProperty(p("hasTimestamp"),l1(String.valueOf(instant),XSDDatatype.XSDdateTime));
+                
+                streamingtempReadings=tempValue.createIndividual(BASE+"tempReadings"+this.c);
+                streamingtempReadings.addProperty(p("hasValue"),l1(roundOffTo2DecPlaces(generatedSensorValue),XSDDatatype.XSDfloat));
+                streamingtempReadings.addProperty(p("hasTimestamp"),l1(String.valueOf(instant),XSDDatatype.XSDdateTime));
                         
                 generatedSensorValue= 23.0F + new Random().nextFloat() * (28.0F - 23.0F);
                         
@@ -112,6 +157,10 @@ public class LBSMARDFStreamTestGenerator extends RdfStream implements Runnable {
                 tempReadings=tempValue.createIndividual(BASE+"tempReadings"+this.c);
                 tempReadings.addProperty(p("hasValue"),l1(roundOffTo2DecPlaces(generatedSensorValue),XSDDatatype.XSDfloat));
                 tempReadings.addProperty(p("hasTimestamp"),l1(String.valueOf(instant),XSDDatatype.XSDdateTime));
+                
+                streamingtempReadings=tempValue.createIndividual(BASE+"tempReadings"+this.c);
+                streamingtempReadings.addProperty(p("hasValue"),l1(roundOffTo2DecPlaces(generatedSensorValue),XSDDatatype.XSDfloat));
+                streamingtempReadings.addProperty(p("hasTimestamp"),l1(String.valueOf(instant),XSDDatatype.XSDdateTime));
             }else{
                 generatedSensorValue= 23.0F + new Random().nextFloat() * (28.0F - 23.0F);
                         
@@ -124,6 +173,10 @@ public class LBSMARDFStreamTestGenerator extends RdfStream implements Runnable {
                 tempReadings=tempValue.createIndividual(BASE+"tempReadings"+this.c);
                 tempReadings.addProperty(p("hasValue"),l1(roundOffTo2DecPlaces(generatedSensorValue),XSDDatatype.XSDfloat));
                 tempReadings.addProperty(p("hasTimestamp"),l1(String.valueOf(instant),XSDDatatype.XSDdateTime));
+                
+                streamingtempReadings=tempValue.createIndividual(BASE+"tempReadings"+this.c);
+                streamingtempReadings.addProperty(p("hasValue"),l1(roundOffTo2DecPlaces(generatedSensorValue),XSDDatatype.XSDfloat));
+                streamingtempReadings.addProperty(p("hasTimestamp"),l1(String.valueOf(instant),XSDDatatype.XSDdateTime));
             }
             ct++;
 
@@ -136,15 +189,22 @@ public class LBSMARDFStreamTestGenerator extends RdfStream implements Runnable {
             this.c++;
             
             try{
-                model.setNsPrefix("smartSpace", BASE); 
+                accumulatedModel.setNsPrefix("smartSpace", BASE); 
+                streamingModel.setNsPrefix("smartSpace", BASE);
                 //model.write(System.out, "RDF/XML"); 
-                String saveRDFFile="C:\\Users\\user\\Documents\\SmartSUM\\dataset\\test.rdf";
+                String saveRDFFile="C:\\Users\\user\\Documents\\SmartSUM\\dataset\\accumulatedData.rdf";
+                String saveStreamRDFFile="C:\\Users\\user\\Documents\\SmartSUM\\dataset\\streamData.rdf";
+                
                 OutputStream output = new FileOutputStream(saveRDFFile);
-                RDFDataMgr.write(output, model, RDFFormat.RDFXML_ABBREV);
+                RDFDataMgr.write(output, accumulatedModel, RDFFormat.RDFXML_ABBREV);
+                
+                output=new FileOutputStream(saveStreamRDFFile);
+                RDFDataMgr.write(output, accumulatedModel, RDFFormat.RDFXML_ABBREV);
                 System.out.println("Data written successfully into RDF. Open at: "+saveRDFFile);
                 
                 String rdfRule="C:\\Users\\user\\Documents\\SmartSUM\\rules\\error.txt";
-                String rdfFile= "C:\\Users\\user\\Documents\\SmartSUM\\dataset\\test.rdf";
+                String rdfFile= "C:\\Users\\user\\Documents\\SmartSUM\\dataset\\streamData.rdf";
+                
                 runEngine(rdfRule, rdfFile);
                 
             }catch(Exception e){
@@ -180,7 +240,8 @@ public class LBSMARDFStreamTestGenerator extends RdfStream implements Runnable {
         //reasoner=reasoner.bindSchema(model);
         InfModel infmodel=ModelFactory.createInfModel(reasoner, model);
         Resource children = infmodel.getResource("http://localhost:8080/smartSpace#hasValue");
-        infmodel.write(System.out, "RDF/XML-ABBREV");
+        //infmodel.write(System.out, "RDF/XML-ABBREV");
+        TestingCsparql.SetInfModel(infmodel);
 //        StmtIterator it=infmodel.listStatements();
 //        while(it.hasNext()){
 //            Statement stmt=it.nextStatement();
