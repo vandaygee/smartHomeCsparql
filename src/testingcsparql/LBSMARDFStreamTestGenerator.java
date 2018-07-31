@@ -50,6 +50,7 @@ public class LBSMARDFStreamTestGenerator extends RdfStream implements Runnable {
     private boolean keepRunning = false;
         
     private RdfQuadruple q=null;
+    private RdfQuadruple q2=null;
        
     float generatedSensorValue =0.0F;
     long generatedTime=0L;
@@ -96,7 +97,14 @@ public class LBSMARDFStreamTestGenerator extends RdfStream implements Runnable {
             generatedTime=System.currentTimeMillis();
             generatedPressure=750.0F + new Random().nextFloat()* (762.0F - 750.0F);
             generatedHumidity= 30 + (int)(Math.random()*(60-30)+1);
-                 
+            
+//            q = new RdfQuadruple("http://localhost:8080/smartSpace#pressureReading" + this.c,
+//			"http://localhost:8080/smartSpace#hasPressureReading", 
+//                        //"http://www.semanticweb.org/40011133/ontologies/2017/10/untitled-ontology-21#temperatureValue" + this.c,
+//                        String.format("%.2f", generatedPressure) ,
+//                        generatedTime);
+//                this.put(q);
+//                 
             pressureReading=pressureValue.createIndividual(BASE+"pressureReading"+this.c);
             pressureReading.addProperty(p("hasPressureReading"),l1(roundOffTo2DecPlaces(generatedPressure),XSDDatatype.XSDfloat));
             pressureReading.addProperty(p("hasTimestamp"),l1(String.valueOf(instant),XSDDatatype.XSDdateTime));
@@ -189,23 +197,23 @@ public class LBSMARDFStreamTestGenerator extends RdfStream implements Runnable {
             this.c++;
             
             try{
-                accumulatedModel.setNsPrefix("smartSpace", BASE); 
-                streamingModel.setNsPrefix("smartSpace", BASE);
-                //model.write(System.out, "RDF/XML"); 
-                String saveRDFFile="C:\\Users\\user\\Documents\\SmartSUM\\dataset\\accumulatedData.rdf";
-                String saveStreamRDFFile="C:\\Users\\user\\Documents\\SmartSUM\\dataset\\streamData.rdf";
-                
-                OutputStream output = new FileOutputStream(saveRDFFile);
-                RDFDataMgr.write(output, accumulatedModel, RDFFormat.RDFXML_ABBREV);
-                
-                output=new FileOutputStream(saveStreamRDFFile);
-                RDFDataMgr.write(output, accumulatedModel, RDFFormat.RDFXML_ABBREV);
-                System.out.println("Data written successfully into RDF. Open at: "+saveRDFFile);
-                
-                String rdfRule="C:\\Users\\user\\Documents\\SmartSUM\\rules\\error.txt";
-                String rdfFile= "C:\\Users\\user\\Documents\\SmartSUM\\dataset\\streamData.rdf";
-                
-                runEngine(rdfRule, rdfFile);
+//                accumulatedModel.setNsPrefix("smartSpace", BASE); 
+//                streamingModel.setNsPrefix("smartSpace", BASE);
+//                //model.write(System.out, "RDF/XML"); 
+//                String saveRDFFile="C:\\Users\\user\\Documents\\SmartSUM\\dataset\\accumulatedData.rdf";
+//                String saveStreamRDFFile="C:\\Users\\user\\Documents\\SmartSUM\\dataset\\streamData.rdf";
+//                
+//                OutputStream output = new FileOutputStream(saveRDFFile);
+//                RDFDataMgr.write(output, accumulatedModel, RDFFormat.RDFXML_ABBREV);
+//                
+//                output=new FileOutputStream(saveStreamRDFFile);
+//                RDFDataMgr.write(output, accumulatedModel, RDFFormat.RDFXML_ABBREV);
+//                System.out.println("Data written successfully into RDF. Open at: "+saveRDFFile);
+//                
+//                String rdfRule="C:\\Users\\user\\Documents\\SmartSUM\\rules\\error.txt";
+//                String rdfFile= "C:\\Users\\user\\Documents\\SmartSUM\\dataset\\streamData.rdf";
+//                
+//                runEngine(rdfRule, rdfFile);
                 
             }catch(Exception e){
                 System.out.println(e.toString());
