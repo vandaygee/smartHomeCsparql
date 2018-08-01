@@ -36,7 +36,7 @@ public class humidityStreamGenerator extends RdfStream implements Runnable {
         while (keepRunning) {
             //Instant instant=Instant.now();
             generatedTime=System.currentTimeMillis();
-           generatedHumidity= 30 + (int)(Math.random()*(60 - 30)+ 1);
+           generatedHumidity= 1 + (int)(Math.random()*(100 - 1)+ 1);
            
             q = new RdfQuadruple("http://localhost:8080/smartSpace#humitidyReadings" + this.c,
 			"http://localhost:8080/smartSpace#hasHumidityReading", 

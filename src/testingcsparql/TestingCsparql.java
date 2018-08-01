@@ -14,9 +14,14 @@ import com.hp.hpl.jena.ontology.OntModel;
 import com.hp.hpl.jena.ontology.OntModelSpec;
 import com.hp.hpl.jena.rdf.model.InfModel;
 import com.hp.hpl.jena.rdf.model.Literal;
+import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
 import com.hp.hpl.jena.rdf.model.Property;
+import com.hp.hpl.jena.rdf.model.Resource;
 import com.hp.hpl.jena.rdf.model.ResourceFactory;
+import com.hp.hpl.jena.reasoner.Reasoner;
+import com.hp.hpl.jena.reasoner.rulesys.GenericRuleReasoner;
+import com.hp.hpl.jena.reasoner.rulesys.Rule;
 import eu.larkc.csparql.cep.api.RdfStream;
 import eu.larkc.csparql.common.RDFTable;
 import eu.larkc.csparql.common.RDFTuple;
@@ -25,7 +30,9 @@ import eu.larkc.csparql.core.engine.CsparqlEngine;
 import eu.larkc.csparql.core.engine.CsparqlEngineImpl;
 import eu.larkc.csparql.core.engine.CsparqlQueryResultProxy;
 import eu.larkc.csparql.core.engine.RDFStreamFormatter;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -37,6 +44,7 @@ import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
 import org.apache.jena.riot.RDFDataMgr;
@@ -171,7 +179,7 @@ public class TestingCsparql {
                               String key = (String) dataEnum.nextElement();
                               streamingTempReadings=streamingTempValue.createIndividual(key);
                               streamingTempReadings.addProperty(p("hasValue"),l1(String.valueOf(tempData.get(key)),XSDDatatype.XSDfloat));
-                              streamingTempReadings.addProperty(p("hasTimestamp"),l1(String.valueOf(instant),XSDDatatype.XSDdateTime));
+                              streamingTempReadings.addProperty(p("tempHasTimestamp"),l1(String.valueOf(instant),XSDDatatype.XSDdateTime));
                               System.out.println(key + " : " + tempData.get(key));
                             }
                             System.out.println("");
@@ -181,7 +189,7 @@ public class TestingCsparql {
                               String key = (String) dataEnum.nextElement();
                               streamingPressureReading=streamingPressureValue.createIndividual(key);
                               streamingPressureReading.addProperty(p("hasPressureReading"),l1(String.valueOf(pressureData.get(key)),XSDDatatype.XSDfloat));
-                              streamingPressureReading.addProperty(p("hasTimestamp"),l1(String.valueOf(instant),XSDDatatype.XSDdateTime));
+                              streamingPressureReading.addProperty(p("pressureHasTimestamp"),l1(String.valueOf(instant),XSDDatatype.XSDdateTime));
                               System.out.println(key + " : " + pressureData.get(key));
                             }
                             
@@ -191,7 +199,7 @@ public class TestingCsparql {
                               String key = (String) dataEnum.nextElement();
                               streamingHumidityReadings=streamingHumidityValue.createIndividual(key);
                               streamingHumidityReadings.addProperty(p("hasHumidityReading"),l1(String.valueOf(humidityData.get(key)),XSDDatatype.XSDinteger));
-                              streamingHumidityReadings.addProperty(p("hasTimestamp"),l1(String.valueOf(instant),XSDDatatype.XSDdateTime));
+                              streamingHumidityReadings.addProperty(p("humidityHasTimestamp"),l1(String.valueOf(instant),XSDDatatype.XSDdateTime));
                               System.out.println(key + " : " + humidityData.get(key));
                             }
                             
@@ -200,8 +208,12 @@ public class TestingCsparql {
                             
                             OutputStream output = new FileOutputStream(saveStreamRDFFile);
                             RDFDataMgr.write(output, streamingModel, RDFFormat.RDFXML_ABBREV);
-                            streamingModel.write(System.out, "RDF/XML"); 
+                            //streamingModel.write(System.out, "RDF/XML"); 
                             System.out.println("Stream RDF written succesffully to:\n"+saveStreamRDFFile);
+                            
+                            String rdfRule="C:\\Users\\user\\Documents\\SmartSUM\\rules\\validation.txt";
+                            String rdfFile= "C:\\Users\\user\\Documents\\SmartSUM\\dataset\\streamData.rdf";                
+                            runEngine(rdfRule, rdfFile);
                         }catch(Exception ex){
                          System.out.println(ex.toString());
                         }
@@ -266,4 +278,25 @@ public class TestingCsparql {
         return ResourceFactory.createTypedLiteral(lexicalform, datatype);
     }
     
+    private static void runEngine(String ruleFile,String rdfFile) throws Exception{
+        Model model = ModelFactory.createDefaultModel();
+        InputStream inschema =new FileInputStream(rdfFile);
+        model.read(inschema, null, "RDF/XML");
+        List rules=Rule.rulesFromURL(ruleFile);
+        System.out.println("\nMy rules:\n"+rules);
+        Reasoner reasoner=new GenericRuleReasoner(rules);
+        //reasoner=reasoner.bindSchema(model);
+        InfModel infmodel=ModelFactory.createInfModel(reasoner, model);
+        Resource children = infmodel.getResource("http://localhost:8080/smartSpace#hasValue");
+        infmodel.write(System.out, "RDF/XML-ABBREV");
+        //TestingCsparql.SetInfModel(infmodel);
+//        StmtIterator it=infmodel.listStatements();
+//        while(it.hasNext()){
+//            Statement stmt=it.nextStatement();
+//            Resource subject = stmt.getSubject();
+//            Property predicate = stmt.getPredicate();
+//            RDFNode object = stmt.getObject(); 
+//            System.out.println( subject.toString() + " " + predicate.toString() + " " + object.toString() );
+        //}
+    }
 }
