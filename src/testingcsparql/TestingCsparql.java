@@ -32,12 +32,14 @@ import eu.larkc.csparql.core.engine.CsparqlQueryResultProxy;
 import eu.larkc.csparql.core.engine.RDFStreamFormatter;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.Duration;
 import java.time.Instant;
 import java.util.Date;
 import java.util.Dictionary;
@@ -76,7 +78,8 @@ public class TestingCsparql {
 	RdfStream tg = null;
         RdfStream tg2=null;
         RdfStream tg3=null;
-	
+        
+        JSONObject JSONAnalysis=new JSONObject();
         // Initialize C-SPARQL Engine
 	CsparqlEngine engine = new CsparqlEngineImpl();
         
@@ -212,8 +215,26 @@ public class TestingCsparql {
                             System.out.println("Stream RDF written succesffully to:\n"+saveStreamRDFFile);
                             
                             String rdfRule="C:\\Users\\user\\Documents\\SmartSUM\\rules\\validation.txt";
-                            String rdfFile= "C:\\Users\\user\\Documents\\SmartSUM\\dataset\\streamData.rdf";                
+                            String rdfFile= "C:\\Users\\user\\Documents\\SmartSUM\\dataset\\streamData.rdf";
+                            
+                            Instant beforeInferencing=Instant.now();
                             runEngine(rdfRule, rdfFile);
+                            Instant afterInferencing=Instant.now();
+                            Duration timeElapsed=Duration.between(beforeInferencing, afterInferencing);
+                            int individualsInferred=tempData.size()+pressureData.size()+humidityData.size();
+                            System.out.println("Quadruple: "+individualsInferred);
+                            System.out.println("Time complexity: "+(timeElapsed.toMillis()/1000)+"."+(timeElapsed.toMillis()%1000)+" seconds");
+                            System.out.println("");
+                            
+                            JSONObject JSONInnerObj=new JSONObject();
+                            JSONInnerObj.put("Quadruple",individualsInferred);
+                            JSONInnerObj.put("Time(s)",(timeElapsed.toMillis()/1000)+"."+(timeElapsed.toMillis()%1000));
+                            JSONAnalysis.put(dateString, JSONInnerObj);
+                            
+                            String saveJSONAnalysis="C:\\Users\\user\\Documents\\SmartSUM\\analysis\\analysis.json";
+                            FileWriter fileWriter = new FileWriter(saveJSONAnalysis);
+                            fileWriter.write(JSONAnalysis.toString());
+                            fileWriter.flush();
                         }catch(Exception ex){
                          System.out.println(ex.toString());
                         }
