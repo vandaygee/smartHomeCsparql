@@ -64,6 +64,7 @@ public class TestingCsparql {
     
     public static InfModel infModel;
     private static final String BASE="http://localhost:8080/smartSpace#";
+    static String analysisText="";
     
     public static void main(String[] args) {
         // TODO code application logic here
@@ -80,6 +81,7 @@ public class TestingCsparql {
         RdfStream tg3=null;
         
         JSONObject JSONAnalysis=new JSONObject();
+       
         // Initialize C-SPARQL Engine
 	CsparqlEngine engine = new CsparqlEngineImpl();
         
@@ -220,8 +222,8 @@ public class TestingCsparql {
                             Instant beforeInferencing=Instant.now();
                             runEngine(rdfRule, rdfFile);
                             Instant afterInferencing=Instant.now();
-                            Duration timeElapsed=Duration.between(beforeInferencing, afterInferencing);
-                            int individualsInferred=tempData.size()+pressureData.size()+humidityData.size();
+                            final Duration timeElapsed=Duration.between(beforeInferencing, afterInferencing);
+                            final int individualsInferred=tempData.size()+pressureData.size()+humidityData.size();
                             System.out.println("Quadruple: "+individualsInferred);
                             System.out.println("Time complexity: "+(timeElapsed.toMillis()/1000)+"."+(timeElapsed.toMillis()%1000)+" seconds");
                             System.out.println("");
@@ -230,11 +232,14 @@ public class TestingCsparql {
                             JSONInnerObj.put("Quadruple",individualsInferred);
                             JSONInnerObj.put("Time(s)",(timeElapsed.toMillis()/1000)+"."+(timeElapsed.toMillis()%1000));
                             JSONAnalysis.put(dateString, JSONInnerObj);
+                            String analysisText=individualsInferred+":"+(timeElapsed.toMillis()/1000)+"."+(timeElapsed.toMillis()%1000);
                             
                             String saveJSONAnalysis="C:\\Users\\user\\Documents\\SmartSUM\\analysis\\analysis.json";
+                            String saveAnalysisText="C:\\Users\\user\\Documents\\SmartSUM\\analysis\\analysis.txt";
                             FileWriter fileWriter = new FileWriter(saveJSONAnalysis);
                             fileWriter.write(JSONAnalysis.toString());
                             fileWriter.flush();
+                            saveAnalysisText(analysisText,saveAnalysisText );
                         }catch(Exception ex){
                          System.out.println(ex.toString());
                         }
@@ -319,5 +324,12 @@ public class TestingCsparql {
 //            RDFNode object = stmt.getObject(); 
 //            System.out.println( subject.toString() + " " + predicate.toString() + " " + object.toString() );
         //}
+    }
+    
+    private static void saveAnalysisText(String text,String savePath) throws Exception{
+        analysisText+=text+"\r\n";
+        FileWriter fileWriter = new FileWriter(savePath);
+        fileWriter.write(analysisText);
+        fileWriter.flush();
     }
 }
