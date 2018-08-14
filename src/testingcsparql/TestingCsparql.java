@@ -64,7 +64,19 @@ public class TestingCsparql {
     
     public static InfModel infModel;
     private static final String BASE="http://localhost:8080/smartSpace#";
-    static String analysisText="";
+    static String analysisText="",CSparqlQueryAnalysisText="";
+    static OntModel historicaldModel=ModelFactory.createOntologyModel(OntModelSpec.RDFS_MEM);
+    
+    static OntClass historicalTempValue=historicaldModel.createClass(BASE+"tempValue");
+    static OntClass historicalHumidityValue=historicaldModel.createClass(BASE+"humidityValue");
+    static OntClass historicalPressureValue=historicaldModel.createClass(BASE+"pressureValue");
+        
+    static Individual historicalTempReadings;
+    static Individual historicalHumidityReadings;
+    static Individual historicalPressureReading;
+    
+    static  Instant beforeQuery=null;
+    static int cycleCount=0;
     
     public static void main(String[] args) {
         // TODO code application logic here
@@ -84,6 +96,7 @@ public class TestingCsparql {
        
         // Initialize C-SPARQL Engine
 	CsparqlEngine engine = new CsparqlEngineImpl();
+        
         
         engine.initialize(true);
         
@@ -126,12 +139,19 @@ public class TestingCsparql {
         } catch (final ParseException ex) {
             logger.error(ex.getMessage(), ex);
 	}
-         
+        
+        beforeQuery=Instant.now();
         if (c1 != null) {
-           
             c1.addObserver( new Observer() {
                 @Override
                 public void update(Observable o, Object arg) {
+                    cycleCount+=1;
+                    Instant afterQuery=Instant.now();
+                    final Duration csparqlQueryTimeElapsed=Duration.between(beforeQuery, afterQuery);
+                    System.out.println("Total Window Cycle: "+cycleCount);
+                    System.out.println("CSPARQL Query Time: "+(csparqlQueryTimeElapsed.toMillis()/1000)+"."+String.format("%03d",(csparqlQueryTimeElapsed.toMillis()%1000)));
+                    beforeQuery=afterQuery;
+                    
                      final RDFTable rdfTable = (RDFTable) arg;
                      //System.out.println(rdfTable.toString());
                      final String[] vars = rdfTable.getNames().toArray(new String[]{});
@@ -186,6 +206,10 @@ public class TestingCsparql {
                               streamingTempReadings.addProperty(p("hasValue"),l1(String.valueOf(tempData.get(key)),XSDDatatype.XSDfloat));
                               streamingTempReadings.addProperty(p("tempHasTimestamp"),l1(String.valueOf(instant),XSDDatatype.XSDdateTime));
                               System.out.println(key + " : " + tempData.get(key));
+                              
+                              historicalTempReadings=historicalTempValue.createIndividual(key);
+                              historicalTempReadings.addProperty(p("hasValue"),l1(String.valueOf(tempData.get(key)),XSDDatatype.XSDfloat));
+                              historicalTempReadings.addProperty(p("tempHasTimestamp"),l1(String.valueOf(instant),XSDDatatype.XSDdateTime));
                             }
                             System.out.println("");
                    
@@ -196,6 +220,10 @@ public class TestingCsparql {
                               streamingPressureReading.addProperty(p("hasPressureReading"),l1(String.valueOf(pressureData.get(key)),XSDDatatype.XSDfloat));
                               streamingPressureReading.addProperty(p("pressureHasTimestamp"),l1(String.valueOf(instant),XSDDatatype.XSDdateTime));
                               System.out.println(key + " : " + pressureData.get(key));
+                              
+                              historicalPressureReading=historicalPressureValue.createIndividual(key);
+                              historicalPressureReading.addProperty(p("hasPressureReading"),l1(String.valueOf(pressureData.get(key)),XSDDatatype.XSDfloat));
+                              historicalPressureReading.addProperty(p("pressureHasTimestamp"),l1(String.valueOf(instant),XSDDatatype.XSDdateTime));
                             }
                             
                             System.out.println("");
@@ -206,15 +234,25 @@ public class TestingCsparql {
                               streamingHumidityReadings.addProperty(p("hasHumidityReading"),l1(String.valueOf(humidityData.get(key)),XSDDatatype.XSDinteger));
                               streamingHumidityReadings.addProperty(p("humidityHasTimestamp"),l1(String.valueOf(instant),XSDDatatype.XSDdateTime));
                               System.out.println(key + " : " + humidityData.get(key));
+                              
+                              historicalHumidityReadings=historicalHumidityValue.createIndividual(key);
+                              historicalHumidityReadings.addProperty(p("hasHumidityReading"),l1(String.valueOf(humidityData.get(key)),XSDDatatype.XSDinteger));
+                              historicalHumidityReadings.addProperty(p("humidityHasTimestamp"),l1(String.valueOf(instant),XSDDatatype.XSDdateTime));
                             }
                             
                             streamingModel.setNsPrefix("smartSpace", BASE);
                             String saveStreamRDFFile="C:\\Users\\user\\Documents\\SmartSUM\\dataset\\streamData.rdf";
                             
+                            historicaldModel.setNsPrefix("smartSpace",BASE);
+                            String saveHistoricalRDFFile="C:\\Users\\user\\Documents\\SmartSUM\\dataset\\historicalData.rdf";
+                            
                             OutputStream output = new FileOutputStream(saveStreamRDFFile);
                             RDFDataMgr.write(output, streamingModel, RDFFormat.RDFXML_ABBREV);
+                            
+                            output =new FileOutputStream(saveHistoricalRDFFile);
+                            RDFDataMgr.write(output,historicaldModel,RDFFormat.RDFXML_ABBREV);
                             //streamingModel.write(System.out, "RDF/XML"); 
-                            System.out.println("Stream RDF written succesffully to:\n"+saveStreamRDFFile);
+                            System.out.println("Stream RDF written successfully to:\n"+saveStreamRDFFile);
                             
                             String rdfRule="C:\\Users\\user\\Documents\\SmartSUM\\rules\\validation.txt";
                             String rdfFile= "C:\\Users\\user\\Documents\\SmartSUM\\dataset\\streamData.rdf";
@@ -225,21 +263,26 @@ public class TestingCsparql {
                             final Duration timeElapsed=Duration.between(beforeInferencing, afterInferencing);
                             final int individualsInferred=tempData.size()+pressureData.size()+humidityData.size();
                             System.out.println("Quadruple: "+individualsInferred);
-                            System.out.println("Time complexity: "+(timeElapsed.toMillis()/1000)+"."+(timeElapsed.toMillis()%1000)+" seconds");
+                            System.out.println("Time complexity: "+(timeElapsed.toMillis()/1000)+"."+String.format("%03d",(timeElapsed.toMillis()%1000)));
                             System.out.println("");
                             
                             JSONObject JSONInnerObj=new JSONObject();
                             JSONInnerObj.put("Quadruple",individualsInferred);
-                            JSONInnerObj.put("Time(s)",(timeElapsed.toMillis()/1000)+"."+(timeElapsed.toMillis()%1000));
+                            JSONInnerObj.put("Time(s)",(timeElapsed.toMillis()/1000)+"."+String.format("%03d",(timeElapsed.toMillis()%1000)));
                             JSONAnalysis.put(dateString, JSONInnerObj);
-                            String analysisText=individualsInferred+":"+(timeElapsed.toMillis()/1000)+"."+(timeElapsed.toMillis()%1000);
+                            
+                            String analysisText=individualsInferred+":"+(timeElapsed.toMillis()/1000)+"."+String.format("%03d",(timeElapsed.toMillis()%1000));
+                            String CSparqlAnalysisText=individualsInferred+":"+(csparqlQueryTimeElapsed.toMillis()/1000)+"."+String.format("%03d",(csparqlQueryTimeElapsed.toMillis()%1000));
                             
                             String saveJSONAnalysis="C:\\Users\\user\\Documents\\SmartSUM\\analysis\\analysis.json";
                             String saveAnalysisText="C:\\Users\\user\\Documents\\SmartSUM\\analysis\\analysis.txt";
+                            String saveCSparqlAnalysisText="C:\\Users\\user\\Documents\\SmartSUM\\analysis\\CSparqlQueryAnalysis.txt";
                             FileWriter fileWriter = new FileWriter(saveJSONAnalysis);
                             fileWriter.write(JSONAnalysis.toString());
                             fileWriter.flush();
-                            saveAnalysisText(analysisText,saveAnalysisText );
+                            saveAnalysisText(analysisText,saveAnalysisText);
+                            SaveCSparqlQueryAnalysisText(CSparqlAnalysisText, saveCSparqlAnalysisText);
+                            
                         }catch(Exception ex){
                          System.out.println(ex.toString());
                         }
@@ -264,7 +307,7 @@ public class TestingCsparql {
         
         // clean up (i.e., unregister query and stream)
 	engine.unregisterQuery(c1.getId());
-	((LBSMARDFStreamTestGenerator) tg).pleaseStop();
+//	((LBSMARDFStreamTestGenerator) tg).pleaseStop();
 	engine.unregisterStream(tg.getIRI());
         
         System.exit(0);
@@ -330,6 +373,13 @@ public class TestingCsparql {
         analysisText+=text+"\r\n";
         FileWriter fileWriter = new FileWriter(savePath);
         fileWriter.write(analysisText);
+        fileWriter.flush();
+    }
+    
+    private static void SaveCSparqlQueryAnalysisText(String text,String savePath) throws Exception{
+        CSparqlQueryAnalysisText+=text+"\r\n";
+        FileWriter fileWriter = new FileWriter(savePath);
+        fileWriter.write(CSparqlQueryAnalysisText);
         fileWriter.flush();
     }
 }

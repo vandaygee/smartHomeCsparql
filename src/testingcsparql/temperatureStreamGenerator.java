@@ -72,7 +72,7 @@ public class temperatureStreamGenerator extends RdfStream implements Runnable  {
                 this.put(q);
             }
             try {
-                Thread.sleep(500);
+                Thread.sleep(1*1000);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
