@@ -67,6 +67,10 @@ public class TestingCsparql {
     static String analysisText="",CSparqlQueryAnalysisText="";
     static OntModel historicaldModel=ModelFactory.createOntologyModel(OntModelSpec.RDFS_MEM);
     
+    static InputStream inputStream=null;
+    static String langauge="RDF/XML";
+    static String smartSpaceRDF= "C:\\Users\\user\\Documents\\SmartSUM\\dataset\\smartSpace.rdf";
+    
     static OntClass historicalTempValue=historicaldModel.createClass(BASE+"tempValue");
     static OntClass historicalHumidityValue=historicaldModel.createClass(BASE+"humidityValue");
     static OntClass historicalPressureValue=historicaldModel.createClass(BASE+"pressureValue");
@@ -80,9 +84,12 @@ public class TestingCsparql {
     
     public static void main(String[] args) {
         // TODO code application logic here
+        
         try {
+                inputStream=new FileInputStream(smartSpaceRDF);
+                historicaldModel.read(inputStream, langauge);
                 PropertyConfigurator.configure(new URL("C:\\Users\\Duchess\\Documents\\SmartSUM\\CSPARQL\\config_files/csparql_readyToGoPack_log4j.properties"));
-	} catch (MalformedURLException e) {
+	} catch (Exception e) {
 		logger.error(e.getMessage(), e);
 	}
         
