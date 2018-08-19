@@ -64,6 +64,7 @@ public class TestingCsparql {
     
     public static InfModel infModel;
     private static final String BASE="http://localhost:8080/smartSpace#";
+     private static final String BASE1="http://localhost:8080/smartSpace/";
     static String analysisText="",CSparqlQueryAnalysisText="";
     static OntModel historicaldModel=ModelFactory.createOntologyModel(OntModelSpec.RDFS_MEM);
     
@@ -71,9 +72,9 @@ public class TestingCsparql {
     static String langauge="RDF/XML";
     static String smartSpaceRDF= "C:\\Users\\user\\Documents\\SmartSUM\\dataset\\smartSpace.rdf";
     
-    static OntClass historicalTempValue=historicaldModel.createClass(BASE+"tempValue");
-    static OntClass historicalHumidityValue=historicaldModel.createClass(BASE+"humidityValue");
-    static OntClass historicalPressureValue=historicaldModel.createClass(BASE+"pressureValue");
+    static OntClass historicalTempValue;
+    static OntClass historicalHumidityValue;
+    static OntClass historicalPressureValue;
         
     static Individual historicalTempReadings;
     static Individual historicalHumidityReadings;
@@ -88,6 +89,13 @@ public class TestingCsparql {
         try {
                 inputStream=new FileInputStream(smartSpaceRDF);
                 historicaldModel.read(inputStream, langauge);
+                
+                historicalTempValue=historicaldModel.getOntClass(BASE1+"tempValue");
+                historicalHumidityValue=historicaldModel.getOntClass(BASE1+"humidityValue");
+                historicalPressureValue=historicaldModel.getOntClass(BASE1+"pressureValue");
+////                OntClass getClass=historicaldModel.getOntClass(BASE1);
+//                System.out.println(historicalTempValue.toString());
+//                return;
                 PropertyConfigurator.configure(new URL("C:\\Users\\Duchess\\Documents\\SmartSUM\\CSPARQL\\config_files/csparql_readyToGoPack_log4j.properties"));
 	} catch (Exception e) {
 		logger.error(e.getMessage(), e);
@@ -251,7 +259,7 @@ public class TestingCsparql {
                             String saveStreamRDFFile="C:\\Users\\user\\Documents\\SmartSUM\\dataset\\streamData.rdf";
                             
                             historicaldModel.setNsPrefix("smartSpace",BASE);
-                            String saveHistoricalRDFFile="C:\\Users\\user\\Documents\\SmartSUM\\dataset\\historicalData.rdf";
+                            String saveHistoricalRDFFile="C:\\Users\\user\\Documents\\SmartSUM\\dataset\\smartSpace.rdf";
                             
                             OutputStream output = new FileOutputStream(saveStreamRDFFile);
                             RDFDataMgr.write(output, streamingModel, RDFFormat.RDFXML_ABBREV);
