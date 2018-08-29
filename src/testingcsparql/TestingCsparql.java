@@ -22,6 +22,7 @@ import com.hp.hpl.jena.rdf.model.ResourceFactory;
 import com.hp.hpl.jena.reasoner.Reasoner;
 import com.hp.hpl.jena.reasoner.rulesys.GenericRuleReasoner;
 import com.hp.hpl.jena.reasoner.rulesys.Rule;
+import com.hp.hpl.jena.util.iterator.ExtendedIterator;
 import eu.larkc.csparql.cep.api.RdfStream;
 import eu.larkc.csparql.common.RDFTable;
 import eu.larkc.csparql.common.RDFTuple;
@@ -70,7 +71,8 @@ public class TestingCsparql {
     
     static InputStream inputStream=null;
     static String langauge="RDF/XML";
-    static String smartSpaceRDF= "C:\\Users\\user\\Documents\\SmartSUM\\dataset\\smartSpace.rdf";
+    //static String smartSpaceRDF= "C:\\Users\\user\\Documents\\SmartSUM\\dataset\\smartSpace.rdf";
+    static String smartSpaceRDF= "C:\\Users\\user\\Documents\\SmartSUM\\ontologies\\smartSpace.rdf";
     
     static OntClass historicalTempValue;
     static OntClass historicalHumidityValue;
@@ -81,7 +83,9 @@ public class TestingCsparql {
     static Individual historicalPressureReading;
     
     static  Instant beforeQuery=null;
-    static int cycleCount=0;
+    static int cycleCount=0,roomSize,season;
+    static float doorDistanceFromTempS,fluoroDistanceFromTempS,radDistanceFromTempS,coolantDistanceFromTemps,windowDistanceFromTempS;
+    
     
     public static void main(String[] args) {
         // TODO code application logic here
@@ -95,8 +99,20 @@ public class TestingCsparql {
                 historicalPressureValue=historicaldModel.getOntClass(BASE1+"pressureValue");
 ////                OntClass getClass=historicaldModel.getOntClass(BASE1);
 //                System.out.println(historicalTempValue.toString());
-//                return;
-                PropertyConfigurator.configure(new URL("C:\\Users\\Duchess\\Documents\\SmartSUM\\CSPARQL\\config_files/csparql_readyToGoPack_log4j.properties"));
+
+                doorDistanceFromTempS=getActuatorDistances("valueofDoorDist", "doorDistFromTempS");
+                fluoroDistanceFromTempS=getActuatorDistances("fluorometerDistance", "fDistanceFromTempS");
+                radDistanceFromTempS=getActuatorDistances("radiaorDistValue", "hasRadDistValue");
+                coolantDistanceFromTemps=getActuatorDistances("coolantDistValue", "hasCoolantValueOf");
+                windowDistanceFromTempS=getActuatorDistances("winDistanceValue", "hasWinDistValueOf");
+                
+                System.out.println("Door: "+doorDistanceFromTempS);
+                System.out.println("Fluoro: "+fluoroDistanceFromTempS);
+                System.out.println("Radio: "+radDistanceFromTempS);
+                System.out.println("Coolant: "+coolantDistanceFromTemps);
+                System.out.println("Window: "+windowDistanceFromTempS);
+                return;
+                //PropertyConfigurator.configure(new URL("C:\\Users\\Duchess\\Documents\\SmartSUM\\CSPARQL\\config_files/csparql_readyToGoPack_log4j.properties"));
 	} catch (Exception e) {
 		logger.error(e.getMessage(), e);
 	}
@@ -396,5 +412,11 @@ public class TestingCsparql {
         FileWriter fileWriter = new FileWriter(savePath);
         fileWriter.write(CSparqlQueryAnalysisText);
         fileWriter.flush();
+    }
+    
+    private static float getActuatorDistances(String Individual, String dataProperty){      
+        Individual in=historicaldModel.getIndividual(BASE1+Individual);
+        Property prp=historicaldModel.getProperty(BASE1+dataProperty);
+        return Float.valueOf(in.getProperty(prp).getObject().toString());
     }
 }
