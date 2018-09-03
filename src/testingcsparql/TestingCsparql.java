@@ -42,6 +42,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.Dictionary;
 import java.util.Enumeration;
@@ -50,6 +51,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
+import java.util.Random;
+import java.util.Scanner;
 import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.riot.RDFFormat;
 
@@ -71,7 +74,7 @@ public class TestingCsparql {
     
     static InputStream inputStream=null;
     static String langauge="RDF/XML";
-    //static String smartSpaceRDF= "C:\\Users\\user\\Documents\\SmartSUM\\dataset\\smartSpace.rdf";
+//    static String smartSpaceRDF= "C:\\Users\\user\\Documents\\SmartSUM\\dataset\\smartSpace.rdf";
     static String smartSpaceRDF= "C:\\Users\\user\\Documents\\SmartSUM\\ontologies\\smartSpace.rdf";
     
     static OntClass historicalTempValue;
@@ -86,32 +89,21 @@ public class TestingCsparql {
     static int cycleCount=0,roomSize,season;
     static float doorDistanceFromTempS,fluoroDistanceFromTempS,radDistanceFromTempS,coolantDistanceFromTemps,windowDistanceFromTempS;
     
+    static Random rand;
     
     public static void main(String[] args) {
         // TODO code application logic here
         
         try {
-                inputStream=new FileInputStream(smartSpaceRDF);
-                historicaldModel.read(inputStream, langauge);
-                
-                historicalTempValue=historicaldModel.getOntClass(BASE1+"tempValue");
-                historicalHumidityValue=historicaldModel.getOntClass(BASE1+"humidityValue");
-                historicalPressureValue=historicaldModel.getOntClass(BASE1+"pressureValue");
-////                OntClass getClass=historicaldModel.getOntClass(BASE1);
-//                System.out.println(historicalTempValue.toString());
-
-                doorDistanceFromTempS=getActuatorDistances("valueofDoorDist", "doorDistFromTempS");
-                fluoroDistanceFromTempS=getActuatorDistances("fluorometerDistance", "fDistanceFromTempS");
-                radDistanceFromTempS=getActuatorDistances("radiaorDistValue", "hasRadDistValue");
-                coolantDistanceFromTemps=getActuatorDistances("coolantDistValue", "hasCoolantValueOf");
-                windowDistanceFromTempS=getActuatorDistances("winDistanceValue", "hasWinDistValueOf");
-                
-                System.out.println("Door: "+doorDistanceFromTempS);
-                System.out.println("Fluoro: "+fluoroDistanceFromTempS);
-                System.out.println("Radio: "+radDistanceFromTempS);
-                System.out.println("Coolant: "+coolantDistanceFromTemps);
-                System.out.println("Window: "+windowDistanceFromTempS);
-                return;
+            inputStream=new FileInputStream(smartSpaceRDF);
+            historicaldModel.read(inputStream, langauge);
+            historicalTempValue=historicaldModel.getOntClass(BASE1+"tempValue");
+            historicalHumidityValue=historicaldModel.getOntClass(BASE1+"humidityValue");
+            historicalPressureValue=historicaldModel.getOntClass(BASE1+"pressureValue");
+//            System.out.println("Door Status:"+setDoorLeakage().toString());
+//            System.out.println("window Status:"+setWindowLeakage().toString());
+//            System.out.println("Season: "+ getSeason());
+//            return;
                 //PropertyConfigurator.configure(new URL("C:\\Users\\Duchess\\Documents\\SmartSUM\\CSPARQL\\config_files/csparql_readyToGoPack_log4j.properties"));
 	} catch (Exception e) {
 		logger.error(e.getMessage(), e);
@@ -237,7 +229,8 @@ public class TestingCsparql {
                               streamingTempReadings.addProperty(p("hasValue"),l1(String.valueOf(tempData.get(key)),XSDDatatype.XSDfloat));
                               streamingTempReadings.addProperty(p("tempHasTimestamp"),l1(String.valueOf(instant),XSDDatatype.XSDdateTime));
                               System.out.println(key + " : " + tempData.get(key));
-                              
+                           
+                                System.out.println(historicalTempValue);
                               historicalTempReadings=historicalTempValue.createIndividual(key);
                               historicalTempReadings.addProperty(p("hasValue"),l1(String.valueOf(tempData.get(key)),XSDDatatype.XSDfloat));
                               historicalTempReadings.addProperty(p("tempHasTimestamp"),l1(String.valueOf(instant),XSDDatatype.XSDdateTime));
@@ -285,8 +278,9 @@ public class TestingCsparql {
                             //streamingModel.write(System.out, "RDF/XML"); 
                             System.out.println("Stream RDF written successfully to:\n"+saveStreamRDFFile);
                             
-                            String rdfRule="C:\\Users\\user\\Documents\\SmartSUM\\rules\\validation.txt";
+//                            String rdfRule="C:\\Users\\user\\Documents\\SmartSUM\\rules\\validation.txt";
                             String rdfFile= "C:\\Users\\user\\Documents\\SmartSUM\\dataset\\streamData.rdf";
+                            String rdfRule=getRuleFile();
                             
                             Instant beforeInferencing=Instant.now();
                             runEngine(rdfRule, rdfFile);
@@ -418,5 +412,148 @@ public class TestingCsparql {
         Individual in=historicaldModel.getIndividual(BASE1+Individual);
         Property prp=historicaldModel.getProperty(BASE1+dataProperty);
         return Float.valueOf(in.getProperty(prp).getObject().toString());
+    }
+    
+    private static boolean doorLeaks(){
+        rand=new Random();
+        return rand.nextBoolean();
+    }
+    
+    private static boolean windowLeaks(){
+        rand=new Random();
+        return rand.nextBoolean();
+    }
+    
+    private static boolean heatRegulatorOn(){
+        rand=new Random();
+        return rand.nextBoolean();
+    }
+    
+    private static boolean coolantRegulatorOn(){
+        rand=new Random();
+        return rand.nextBoolean();
+    }
+    
+    private static String getSeason(){
+        Calendar now = Calendar.getInstance();
+        int month= now.get(Calendar.MONTH)+1;
+        String season = "";
+        switch(month){
+            case 1:
+                season = "winter";
+                break;
+            case 2:
+                season = "winter";
+                break; 
+            case 3:
+                season = "spring";
+                break; 
+            case 4:
+                season = "spring";
+                break;
+            case 5:
+                season = "spring";
+                break;
+            case 6:
+                season = "summer";
+                break;
+            case 7:
+                season = "summer";
+                break;
+            case 8:
+                season = "summer";
+                break;
+            case 9:
+                season = "autum";
+                break;
+            case 10:
+                season = "autum";
+                break;
+            case 11:
+                season = "autum";
+                break;
+            case 12:
+                season = "winter";
+                break;
+        }
+        return season;
+    }
+    
+    private static String getRuleFile(){
+        String ruleURL="";
+        boolean doorIsLaeking=doorLeaks();
+        boolean windowIsLaeking=windowLeaks();
+        boolean heatRegulatorIsOn=heatRegulatorOn();
+        boolean coolantRegulatorIsOn=coolantRegulatorOn();
+        String seasonOfTheYear=getSeason();
+        
+        System.out.println("Door leakage: "+doorIsLaeking);
+        System.out.println("Window leakage: "+windowIsLaeking);
+        System.out.println("Heat Regulator: "+(heatRegulatorIsOn ? "ON" : "OFF"));
+        System.out.println("Coolant Regulator: "+(coolantRegulatorIsOn ? "ON" : "OFF"));
+        System.out.println("Season of the year: "+getSeason());
+        
+        if(doorIsLaeking || windowIsLaeking){
+            switch(seasonOfTheYear){
+                case "winter":
+                    ruleURL="C:\\Users\\user\\Documents\\SmartSUM\\rules\\winter.txt";
+                    break;
+                case "spring":
+                    ruleURL="C:\\Users\\user\\Documents\\SmartSUM\\rules\\spring.txt";
+                    break;
+                case "summer":
+                    ruleURL="C:\\Users\\user\\Documents\\SmartSUM\\rules\\summer.txt";
+                    break;
+                case "autum":
+                    ruleURL="C:\\Users\\user\\Documents\\SmartSUM\\rules\\autum.txt";
+                    break;
+            }
+        }else if(heatRegulatorIsOn || coolantRegulatorIsOn){
+            if(heatRegulatorOn() && !coolantRegulatorOn()){
+                ruleURL="C:\\Users\\user\\Documents\\SmartSUM\\rules\\heat.txt";
+            }else if(!heatRegulatorIsOn && coolantRegulatorIsOn){
+                ruleURL="C:\\Users\\user\\Documents\\SmartSUM\\rules\\coolant.txt";
+            }else if(heatRegulatorIsOn && coolantRegulatorIsOn){
+                ruleURL="C:\\Users\\user\\Documents\\SmartSUM\\rules\\heatandcoolant.txt";
+            }
+        }else{
+            ruleURL="C:\\Users\\user\\Documents\\SmartSUM\\rules\\consistency.txt";
+        }
+        
+        System.out.println("Rule File: "+ruleURL);
+        return ruleURL;
+    }
+    
+    
+    
+    private void unusedCodes(){
+//        System.out.println("Select Season:");
+//                System.out.println("Autum -----------> 1");
+//                System.out.println("Spring ----------> 2");
+//                System.out.println("Summer ----------> 3");
+//                System.out.println("Winter ----------> 4");
+//                Scanner sc =new Scanner(System.in);
+//                season=sc.nextInt();
+//                inputStream=new FileInputStream(smartSpaceRDF);
+//                historicaldModel.read(inputStream, langauge);
+                
+//                historicalTempValue=historicaldModel.getOntClass(BASE1+"tempValue");
+//                historicalHumidityValue=historicaldModel.getOntClass(BASE1+"humidityValue");
+//                historicalPressureValue=historicaldModel.getOntClass(BASE1+"pressureValue");
+////                OntClass getClass=historicaldModel.getOntClass(BASE1);
+//                System.out.println(historicalTempValue.toString());
+
+//                doorDistanceFromTempS=getActuatorDistances("valueofDoorDist", "doorDistFromTempS");
+//                fluoroDistanceFromTempS=getActuatorDistances("fluorometerDistance", "fDistanceFromTempS");
+//                radDistanceFromTempS=getActuatorDistances("radiaorDistValue", "hasRadDistValue");
+//                coolantDistanceFromTemps=getActuatorDistances("coolantDistValue", "hasCoolantValueOf");
+//                windowDistanceFromTempS=getActuatorDistances("winDistanceValue", "hasWinDistValueOf");
+//                
+//                System.out.println("Door: "+doorDistanceFromTempS);
+//                System.out.println("Fluoro: "+fluoroDistanceFromTempS);
+//                System.out.println("Radio: "+radDistanceFromTempS);
+//                System.out.println("Coolant: "+coolantDistanceFromTemps);
+//                System.out.println("Window: "+windowDistanceFromTempS);
+//                return;
     }
 }

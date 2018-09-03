@@ -61,6 +61,16 @@ public class temperatureStreamGenerator extends RdfStream implements Runnable  {
                         String.format("%.2f", generatedTemperature) ,
                         System.currentTimeMillis());
                 this.put(q);
+            }else if(System.currentTimeMillis()%7==0){
+                generatedTemperature= -25.2F +new Random().nextFloat() * (38.5F - (-25.5F));
+                        
+                q = new RdfQuadruple("http://localhost:8080/smartSpace#tempReadings" + this.c,
+			"http://localhost:8080/smartSpace#hasValue", 
+                        //"http://www.semanticweb.org/40011133/ontologies/2017/10/untitled-ontology-21#temperatureValue" + this.c,
+                        String.format("%.2f", generatedTemperature) ,
+                        generatedTime);
+                this.put(q);
+               
             }else{
                 generatedTemperature= 23.0F + new Random().nextFloat() * (28.0F - 23.0F);
                         
