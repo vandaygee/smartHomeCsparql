@@ -70,6 +70,8 @@ public class TestingCsparql {
     private static final String BASE="http://localhost:8080/smartSpace#";
      private static final String BASE1="http://localhost:8080/smartSpace/";
     static String analysisText="",CSparqlQueryAnalysisText="";
+    static String saveRuleAnalysisText,inferenceRule;
+    static String winterAnalysis="",springAnalysis="",summerAnalysis="",autumAnalysis="",heatAnalysis="",coolantAnalysis="",heatcoolantAnalysis="",consistencyAnalysis="";
     static OntModel historicaldModel=ModelFactory.createOntologyModel(OntModelSpec.RDFS_MEM);
     
     static InputStream inputStream=null;
@@ -267,16 +269,16 @@ public class TestingCsparql {
                             streamingModel.setNsPrefix("smartSpace", BASE);
                             String saveStreamRDFFile="C:\\Users\\user\\Documents\\SmartSUM\\dataset\\streamData.rdf";
                             
-                            historicaldModel.setNsPrefix("smartSpace",BASE);
-                            String saveHistoricalRDFFile="C:\\Users\\user\\Documents\\SmartSUM\\dataset\\smartSpace.rdf";
+//                            historicaldModel.setNsPrefix("smartSpace",BASE);
+//                            String saveHistoricalRDFFile="C:\\Users\\user\\Documents\\SmartSUM\\dataset\\smartSpace.rdf";
                             
                             OutputStream output = new FileOutputStream(saveStreamRDFFile);
                             RDFDataMgr.write(output, streamingModel, RDFFormat.RDFXML_ABBREV);
                             
-                            output =new FileOutputStream(saveHistoricalRDFFile);
-                            RDFDataMgr.write(output,historicaldModel,RDFFormat.RDFXML_ABBREV);
-                            //streamingModel.write(System.out, "RDF/XML"); 
-                            System.out.println("Stream RDF written successfully to:\n"+saveStreamRDFFile);
+//                            output =new FileOutputStream(saveHistoricalRDFFile);
+//                            RDFDataMgr.write(output,historicaldModel,RDFFormat.RDFXML_ABBREV);
+//                            //streamingModel.write(System.out, "RDF/XML"); 
+//                            System.out.println("Stream RDF written successfully to:\n"+saveStreamRDFFile);
                             
 //                            String rdfRule="C:\\Users\\user\\Documents\\SmartSUM\\rules\\validation.txt";
                             String rdfFile= "C:\\Users\\user\\Documents\\SmartSUM\\dataset\\streamData.rdf";
@@ -307,6 +309,7 @@ public class TestingCsparql {
                             fileWriter.flush();
                             saveAnalysisText(analysisText,saveAnalysisText);
                             SaveCSparqlQueryAnalysisText(CSparqlAnalysisText, saveCSparqlAnalysisText);
+                            saveInferencingAnalysis(analysisText, inferenceRule, saveRuleAnalysisText);
                             
                         }catch(Exception ex){
                          System.out.println(ex.toString());
@@ -377,7 +380,7 @@ public class TestingCsparql {
         InputStream inschema =new FileInputStream(rdfFile);
         model.read(inschema, null, "RDF/XML");
         List rules=Rule.rulesFromURL(ruleFile);
-        System.out.println("\nMy rules:\n"+rules);
+        //System.out.println("\nMy rules:\n"+rules);
         Reasoner reasoner=new GenericRuleReasoner(rules);
         //reasoner=reasoner.bindSchema(model);
         InfModel infmodel=ModelFactory.createInfModel(reasoner, model);
@@ -405,6 +408,47 @@ public class TestingCsparql {
         CSparqlQueryAnalysisText+=text+"\r\n";
         FileWriter fileWriter = new FileWriter(savePath);
         fileWriter.write(CSparqlQueryAnalysisText);
+        fileWriter.flush();
+    }
+    
+    private static void saveInferencingAnalysis(String text, String rule, String savePath) throws Exception{
+        String saveText="";
+        switch (rule){
+            case "winter":
+                winterAnalysis+=text+"\r\n";
+                saveText=winterAnalysis;
+                break;
+            case "spring":
+                springAnalysis+=text+"\r\n";
+                saveText=springAnalysis;
+                break;
+            case "summer":
+                summerAnalysis+=text+"\r\n";
+                saveText=summerAnalysis;
+                break;
+            case "autum":
+                autumAnalysis+=text+"\r\n";
+                saveText=autumAnalysis;
+                break;
+            case "heat":
+                heatAnalysis+=text+"\r\n";
+                saveText=heatAnalysis;
+                break;
+            case "coolant":
+                coolantAnalysis+=text+"\r\n";
+                saveText=coolantAnalysis;
+                break;
+            case "heatcoolant":
+                heatcoolantAnalysis+=text+"\r\n";
+                saveText=heatcoolantAnalysis;
+                break;
+            case "consitency":
+                consistencyAnalysis+=text+"\r\n";
+                saveText=consistencyAnalysis;
+                break;
+        }
+        FileWriter fileWriter = new FileWriter(savePath);
+        fileWriter.write(saveText);
         fileWriter.flush();
     }
     
@@ -497,36 +541,55 @@ public class TestingCsparql {
             switch(seasonOfTheYear){
                 case "winter":
                     ruleURL="C:\\Users\\user\\Documents\\SmartSUM\\rules\\winter.txt";
+                    saveRuleAnalysisText="C:\\Users\\user\\Documents\\SmartSUM\\analysis\\winterAnalysis.txt";
+                    inferenceRule="winter";
                     break;
                 case "spring":
                     ruleURL="C:\\Users\\user\\Documents\\SmartSUM\\rules\\spring.txt";
+                    saveRuleAnalysisText="C:\\Users\\user\\Documents\\SmartSUM\\analysis\\springAnalysis.txt";
+                    inferenceRule="spring";
                     break;
                 case "summer":
                     ruleURL="C:\\Users\\user\\Documents\\SmartSUM\\rules\\summer.txt";
+                    saveRuleAnalysisText="C:\\Users\\user\\Documents\\SmartSUM\\analysis\\summerAnalysis.txt";
+                    inferenceRule="summer";
                     break;
                 case "autum":
                     ruleURL="C:\\Users\\user\\Documents\\SmartSUM\\rules\\autum.txt";
+                    saveRuleAnalysisText="C:\\Users\\user\\Documents\\SmartSUM\\analysis\\autumAnalysis.txt";
+                    inferenceRule="autum";
                     break;
             }
         }else if(heatRegulatorIsOn || coolantRegulatorIsOn){
-            if(heatRegulatorOn() && !coolantRegulatorOn()){
+            if(heatRegulatorIsOn && !coolantRegulatorIsOn){
                 ruleURL="C:\\Users\\user\\Documents\\SmartSUM\\rules\\heat.txt";
+                saveRuleAnalysisText="C:\\Users\\user\\Documents\\SmartSUM\\analysis\\heatAnalysis.txt";
+                inferenceRule="heat";
             }else if(!heatRegulatorIsOn && coolantRegulatorIsOn){
                 ruleURL="C:\\Users\\user\\Documents\\SmartSUM\\rules\\coolant.txt";
+                saveRuleAnalysisText="C:\\Users\\user\\Documents\\SmartSUM\\analysis\\coolantAnalysis.txt";
+                inferenceRule="coolant";
             }else if(heatRegulatorIsOn && coolantRegulatorIsOn){
                 ruleURL="C:\\Users\\user\\Documents\\SmartSUM\\rules\\heatandcoolant.txt";
+                saveRuleAnalysisText="C:\\Users\\user\\Documents\\SmartSUM\\analysis\\heatandcoolantAnalysis.txt";
+                inferenceRule="heatcoolant";
             }
         }else{
             ruleURL="C:\\Users\\user\\Documents\\SmartSUM\\rules\\consistency.txt";
+            saveRuleAnalysisText="C:\\Users\\user\\Documents\\SmartSUM\\analysis\\consistencyAnalysis.txt";
+            inferenceRule="consistency";
         }
         
         System.out.println("Rule File: "+ruleURL);
         return ruleURL;
     }
     
-    
-    
     private void unusedCodes(){
+        //get data count n time for each rule
+        //conflict resolution check btw rules
+        //accuracy evaluation for fault tolreant system
+        //pull all redaings and filter out 
+        
 //        System.out.println("Select Season:");
 //                System.out.println("Autum -----------> 1");
 //                System.out.println("Spring ----------> 2");
