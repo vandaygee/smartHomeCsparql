@@ -12,7 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 
-public class temperatureStreamGenerator extends RdfStream implements Runnable  {
+public class temperatureStreamGenerator2 extends RdfStream implements Runnable  {
     protected final Logger logger = LoggerFactory.getLogger(temperatureStreamGenerator.class);	
     private int c = 1;
     private boolean keepRunning = false;
@@ -23,7 +23,7 @@ public class temperatureStreamGenerator extends RdfStream implements Runnable  {
     long generatedTime=0L;
     int timeCount=0;
     
-    public temperatureStreamGenerator(final String iri){
+    public temperatureStreamGenerator2(final String iri){
         super(iri);
     }
     
@@ -35,41 +35,34 @@ public class temperatureStreamGenerator extends RdfStream implements Runnable  {
         while (keepRunning) {
             //Instant instant=Instant.now();
             timeCount+=1;
-            if(timeCount > 0 && timeCount <= 2 ){
-                generatedTemperature= 19.0F + new Random().nextFloat() * (21.0F - 19.0F);
+            if(timeCount <5){
+               // generatedTemperature= 19.0F + new Random().nextFloat() * (21.0F - 19.0F);
+               generatedTemperature= -25.2F +new Random().nextFloat() * (19.7F - (-25.5F));
                         
-                q = new RdfQuadruple("http://localhost:8080/smartSpace#tempReadings" + this.c,
+                q = new RdfQuadruple("http://localhost:8080/smartSpace#temp2Readings" + this.c,
 			"http://localhost:8080/smartSpace#hasValue", 
                         //"http://www.semanticweb.org/40011133/ontologies/2017/10/untitled-ontology-21#temperatureValue" + this.c,
-                        String.format("%.2f", -27.44) ,
+                        String.format("%.2f", generatedTemperature) ,
                         System.currentTimeMillis());
                 this.put(q);
                
-            }else if(timeCount <= 3){
-                q = new RdfQuadruple("http://localhost:8080/smartSpace#tempReadings" + this.c,
-			"http://localhost:8080/smartSpace#hasValue", 
-                        //"http://www.semanticweb.org/40011133/ontologies/2017/10/untitled-ontology-21#temperatureValue" + this.c,
-                        //String.format("%.2f", generatedTemperature) ,
-                        "8888.88",
-                        System.currentTimeMillis());
-                this.put(q);
-            }
-            else{
+            }else{
                 timeCount=0;
                 generatedTime=System.currentTimeMillis();
                 if(System.currentTimeMillis()%3==0){
                     generatedTemperature= 0.0F + rnd.nextFloat() * (22.0F - 0.0F);
 
-                    q = new RdfQuadruple("http://localhost:8080/smartSpace#tempReadings" + this.c,
+                    q = new RdfQuadruple("http://localhost:8080/smartSpace#temp2Readings" + this.c,
                             "http://localhost:8080/smartSpace#hasValue", 
                             //"http://www.semanticweb.org/40011133/ontologies/2017/10/untitled-ontology-21#temperatureValue" + this.c,
-                            String.format("%.2f", generatedTemperature) ,
+                            //String.format("%.2f", generatedTemperature) ,
+                            "27.44",
                             generatedTime);
                     this.put(q);
 
                 }else if(System.currentTimeMillis()%5==0){
                     generatedTemperature= 23.0F + new Random().nextFloat() * (28.0F - 23.0F);
-                    q = new RdfQuadruple("http://localhost:8080/smartSpace#tempReadings" + this.c,
+                    q = new RdfQuadruple("http://localhost:8080/smartSpace#temp2Readings" + this.c,
                             "http://localhost:8080/smartSpace#hasValue", 
                             //"http://www.semanticweb.org/40011133/ontologies/2017/10/untitled-ontology-21#temperatureValue" + this.c,
                             String.format("%.2f", generatedTemperature) ,
@@ -78,7 +71,7 @@ public class temperatureStreamGenerator extends RdfStream implements Runnable  {
 
                     generatedTemperature= 23.0F + new Random().nextFloat() * (28.0F - 23.0F);
 
-                    q = new RdfQuadruple("http://localhost:8080/smartSpace#tempReadings" + this.c,
+                    q = new RdfQuadruple("http://localhost:8080/smartSpace#temp2Readings" + this.c,
                             "http://localhost:8080/smartSpace#hasValue", 
                             //"http://www.semanticweb.org/40011133/ontologies/2017/10/untitled-ontology-21#temperatureValue" + this.c,
                             String.format("%.2f", generatedTemperature) ,
@@ -87,7 +80,7 @@ public class temperatureStreamGenerator extends RdfStream implements Runnable  {
                 }else if(System.currentTimeMillis()%7==0){
                     generatedTemperature= -25.2F +new Random().nextFloat() * (38.5F - (-25.5F));
 
-                    q = new RdfQuadruple("http://localhost:8080/smartSpace#tempReadings" + this.c,
+                    q = new RdfQuadruple("http://localhost:8080/smartSpace#temp2Readings" + this.c,
                             "http://localhost:8080/smartSpace#hasValue", 
                             //"http://www.semanticweb.org/40011133/ontologies/2017/10/untitled-ontology-21#temperatureValue" + this.c,
                             String.format("%.2f", generatedTemperature) ,

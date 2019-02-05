@@ -1,8 +1,4 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
+
 package testingcsparql;
 
 import eu.larkc.csparql.cep.api.RdfQuadruple;
@@ -12,19 +8,19 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 
-public class humidityStreamGenerator extends RdfStream implements Runnable {
+public class pressureStreamGenerator2 extends RdfStream implements Runnable {
     
-    protected final Logger logger = LoggerFactory.getLogger(humidityStreamGenerator.class);	
+    protected final Logger logger = LoggerFactory.getLogger(pressureStreamGenerator.class);	
     private int c = 1;
     private boolean keepRunning = false;
      
     private RdfQuadruple q=null;
      
-    int generatedHumidity=0;
+    float generatedPressure=0.0F;
     long generatedTime=0L;
   
       
-    public humidityStreamGenerator(final String iri){
+    public pressureStreamGenerator2(final String iri){
         super(iri);
     }
     
@@ -36,12 +32,12 @@ public class humidityStreamGenerator extends RdfStream implements Runnable {
         while (keepRunning) {
             //Instant instant=Instant.now();
             generatedTime=System.currentTimeMillis();
-          generatedHumidity= 40 + (int)(Math.random()*(50 - 40));
+            generatedPressure=750.0F + rnd.nextFloat()* (762.0F - 750.0F);
            
-            q = new RdfQuadruple("http://localhost:8080/smartSpace#humitidyReadings" + this.c,
-			"http://localhost:8080/smartSpace#hasHumidityReading", 
+            q = new RdfQuadruple("http://localhost:8080/smartSpace#pressure2Reading" + this.c,
+			"http://localhost:8080/smartSpace#hasPressureReading", 
                         //"http://www.semanticweb.org/40011133/ontologies/2017/10/untitled-ontology-21#temperatureValue" + this.c,
-                        String.valueOf(generatedHumidity) ,
+                        String.format("%.2f", generatedPressure) ,
                         generatedTime);
                 this.put(q);
             try {
@@ -50,7 +46,7 @@ public class humidityStreamGenerator extends RdfStream implements Runnable {
                 e.printStackTrace();
             }
             this.c++; 
-            
         }
     }
+    
 }

@@ -12,7 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 
-public class humidityStreamGenerator extends RdfStream implements Runnable {
+public class humidityStreamGenerator2 extends RdfStream implements Runnable {
     
     protected final Logger logger = LoggerFactory.getLogger(humidityStreamGenerator.class);	
     private int c = 1;
@@ -24,7 +24,7 @@ public class humidityStreamGenerator extends RdfStream implements Runnable {
     long generatedTime=0L;
   
       
-    public humidityStreamGenerator(final String iri){
+    public humidityStreamGenerator2(final String iri){
         super(iri);
     }
     
@@ -36,9 +36,9 @@ public class humidityStreamGenerator extends RdfStream implements Runnable {
         while (keepRunning) {
             //Instant instant=Instant.now();
             generatedTime=System.currentTimeMillis();
-          generatedHumidity= 40 + (int)(Math.random()*(50 - 40));
+           generatedHumidity= 40 + (int)(Math.random()*(50 - 40)+ 40);
            
-            q = new RdfQuadruple("http://localhost:8080/smartSpace#humitidyReadings" + this.c,
+            q = new RdfQuadruple("http://localhost:8080/smartSpace#humitidy2Readings" + this.c,
 			"http://localhost:8080/smartSpace#hasHumidityReading", 
                         //"http://www.semanticweb.org/40011133/ontologies/2017/10/untitled-ontology-21#temperatureValue" + this.c,
                         String.valueOf(generatedHumidity) ,
@@ -50,7 +50,6 @@ public class humidityStreamGenerator extends RdfStream implements Runnable {
                 e.printStackTrace();
             }
             this.c++; 
-            
         }
     }
 }
